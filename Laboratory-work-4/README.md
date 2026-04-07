@@ -1,5 +1,13 @@
 ## Складна обробка текстових даних засобами оболонки Unix-подібних ОС інтерпретора команд ОС
 
+<img width="653" height="144" alt="image" src="https://github.com/user-attachments/assets/2e33199f-8e53-4dcb-b005-5db407dc3583" />
+
+2.1.1
+
+<img width="737" height="122" alt="image" src="https://github.com/user-attachments/assets/aeb55e79-686a-42f8-bb03-77c762b16d5b" />
+
+2.1.2
+
 <img width="781" height="67" alt="2 2 1" src="https://github.com/user-attachments/assets/1d206a47-2026-403a-8e47-f16e2269a5ae" />
 
 2.2.1
