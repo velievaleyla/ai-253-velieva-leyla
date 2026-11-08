@@ -12,9 +12,9 @@
 
 Відповідно до методичних вказівок та вимог до контрольного завдання №4, ієрархічна модель даних представляється у вигляді орієнтованого графа — дерева (tree), для якого виконуються такі базові правила:
 1. **Кожен об'єкт предметної області представлений як вузол (node) дерева**:
-   - **Вузли-класи (Class Nodes / Segments)** — позначають сутності концептуальної моделі;
-   - **Вузли-атрибути (Attribute Nodes)** — позначають властивості відповідних сутностей.
-2. **Єдиний корінь дерева (Root Node)**: існує рівно один кореневий об'єкт на найвищому рівні ієрархії. У розробленій моделі коренем обрано сутність `client` (Клієнт), оскільки обслуговування клієнта є центральним процесом функціонування меблевого магазину.
+   - **Вузли-класи (Class Nodes / Segments)** — позначають сутності концептуальної моделі та відображаються прямокутниками `[ClassName]`;
+   - **Вузли-атрибути (Attribute Nodes)** — позначають властивості відповідних сутностей та відображаються колами `((AttributeName))`.
+2. **Єдиний корінь дерева (Root Node)**: існує рівно один кореневий об'єкт на найвищому рівні ієрархії. У розробленій моделі коренем обрано сутність `CLIENT[Client]` (Клієнт), оскільки обслуговування клієнта є центральним процесом функціонування меблевого магазину.
 3. **Відношення «батько-нащадок» (Parent–Child Relationship, PCR)**:
    - Вузли пов'язані спрямованими зв'язками зверху вниз від parent-вузла до child-вузла;
    - **Один parent-вузол може мати багато зв'язків із child-вузлами** (відношення 1:N);
@@ -25,115 +25,66 @@
 
 ## 2. Логічна схема БД ієрархічної моделі даних мовою Mermaid
 
-Нижче наведено логічну схему ієрархічної моделі даних, спроєктовану на основі концептуальної UML-діаграми класів із контрольного завдання №2 (`DB-CW-2`).
+Нижче наведено логічну схему ієрархічної моделі даних, оформлену відповідно до зразка опису (класи представлені прямокутниками `ID[Name]`, атрибути — колами `id((Name))`):
 
 ```mermaid
 graph TD
-    %% Стилізація вузлів: класи (синій акцент) та атрибути (фіолетовий акцент)
-    classDef classNode fill:#D4E6F1,stroke:#2980B9,stroke-width:2px,color:#1B4F72,font-weight:bold;
-    classDef attrNode fill:#E8DAEF,stroke:#884EA0,stroke-width:1.5px,color:#512E5F;
+  %% ===== Ієрархічна модель: Client → Order → Furniture → (Manufacturer, Supplier) =====
 
-    %% 1. Корінь дерева: Клієнт (Client)
-    client([client]):::classNode
-    
-    %% Атрибути Client
-    c_fullname([fullName]):::attrNode
-    c_phone([phone]):::attrNode
-    c_address([address]):::attrNode
-    
-    client --> c_fullname
-    client --> c_phone
-    client --> c_address
+  %% Root
+  CLIENT[Client]
+  CLIENT --> c_fullname((FullName))
+  CLIENT --> c_phone((Phone))
+  CLIENT --> c_address((Address))
 
-    %% 2. Дочірній клас: Замовлення (Order)
-    order([order]):::classNode
-    client --> order
+  %% Order (child of Client)
+  CLIENT --> ORDER[Order]
+  ORDER --> o_orderdate((OrderDate))
+  ORDER --> o_executionstatus((ExecutionStatus))
+  ORDER --> o_deliveryaddress((DeliveryAddress))
+  ORDER --> o_totalamount((TotalAmount))
 
-    %% Атрибути Order
-    o_date([orderDate]):::attrNode
-    o_status([executionStatus]):::attrNode
-    o_address([deliveryAddress]):::attrNode
-    o_amount([totalAmount]):::attrNode
+  %% Contract (child of Order)
+  ORDER --> CONTRACT[Contract]
+  CONTRACT --> cnt_contractdate((ContractDate))
+  CONTRACT --> cnt_terms((Terms))
 
-    order --> o_date
-    order --> o_status
-    order --> o_address
-    order --> o_amount
+  %% Receipt (child of Order)
+  ORDER --> RECEIPT[Receipt]
+  RECEIPT --> rcp_paymentdate((PaymentDate))
+  RECEIPT --> rcp_amount((Amount))
 
-    %% 3. Дочірній клас: Договір (Contract)
-    contract([contract]):::classNode
-    order --> contract
-    cnt_date([contractDate]):::attrNode
-    cnt_terms([terms]):::attrNode
-    contract --> cnt_date
-    contract --> cnt_terms
+  %% Manager (child of Order)
+  ORDER --> MANAGER[Manager]
+  MANAGER --> m_fullname((FullName))
+  MANAGER --> m_phone((Phone))
+  MANAGER --> m_position((Position))
+  MANAGER --> m_qualification((Qualification))
 
-    %% 4. Дочірній клас: Квитанція (Receipt)
-    receipt([receipt]):::classNode
-    order --> receipt
-    rcp_date([paymentDate]):::attrNode
-    rcp_amount([amount]):::attrNode
-    receipt --> rcp_date
-    receipt --> rcp_amount
+  %% Furniture (child of Order)
+  ORDER --> FURNITURE[Furniture]
+  FURNITURE --> f_name((Name))
+  FURNITURE --> f_category((Category))
+  FURNITURE --> f_material((Material))
+  FURNITURE --> f_color((Color))
+  FURNITURE --> f_dimensions((Dimensions))
+  FURNITURE --> f_price((Price))
+  FURNITURE --> f_availabilitystatus((AvailabilityStatus))
+  FURNITURE --> f_productiontime((ProductionTime))
 
-    %% 5. Дочірній клас: Менеджер (Manager)
-    manager([manager]):::classNode
-    order --> manager
-    m_fullname([fullName]):::attrNode
-    m_phone([phone]):::attrNode
-    m_position([position]):::attrNode
-    m_qual([qualification]):::attrNode
-    manager --> m_fullname
-    manager --> m_phone
-    manager --> m_position
-    manager --> m_qual
+  %% Manufacturer (child of Furniture)
+  FURNITURE --> MANUFACTURER[Manufacturer]
+  MANUFACTURER --> mfr_name((Name))
+  MANUFACTURER --> mfr_country((Country))
+  MANUFACTURER --> mfr_contacts((Contacts))
 
-    %% 6. Дочірній клас: Меблі (Furniture)
-    furniture([furniture]):::classNode
-    order --> furniture
-
-    %% Атрибути Furniture
-    f_name([name]):::attrNode
-    f_category([category]):::attrNode
-    f_material([material]):::attrNode
-    f_color([color]):::attrNode
-    f_dim([dimensions]):::attrNode
-    f_price([price]):::attrNode
-    f_avail([availabilityStatus]):::attrNode
-    f_prodtime([productionTime]):::attrNode
-
-    furniture --> f_name
-    furniture --> f_category
-    furniture --> f_material
-    furniture --> f_color
-    furniture --> f_dim
-    furniture --> f_price
-    furniture --> f_avail
-    furniture --> f_prodtime
-
-    %% 7. Дочірній клас: Виробник (Manufacturer)
-    manufacturer([manufacturer]):::classNode
-    furniture --> manufacturer
-    mfr_name([name]):::attrNode
-    mfr_country([country]):::attrNode
-    mfr_contacts([contacts]):::attrNode
-    manufacturer --> mfr_name
-    manufacturer --> mfr_country
-    manufacturer --> mfr_contacts
-
-    %% 8. Дочірній клас: Постачальник (Supplier)
-    supplier([supplier]):::classNode
-    furniture --> supplier
-    sup_name([name]):::attrNode
-    sup_contact([contactPerson]):::attrNode
-    sup_phone([phone]):::attrNode
-    sup_address([address]):::attrNode
-    sup_terms([supplyTerms]):::attrNode
-    supplier --> sup_name
-    supplier --> sup_contact
-    supplier --> sup_phone
-    supplier --> sup_address
-    supplier --> sup_terms
+  %% Supplier (child of Furniture)
+  FURNITURE --> SUPPLIER[Supplier]
+  SUPPLIER --> sup_name((Name))
+  SUPPLIER --> sup_contactperson((ContactPerson))
+  SUPPLIER --> sup_phone((Phone))
+  SUPPLIER --> sup_address((Address))
+  SUPPLIER --> sup_supplyterms((SupplyTerms))
 ```
 
 ---
@@ -144,63 +95,64 @@ graph TD
 
 | Рівень ієрархії | Вузол-клас | Батьківський вузол (Parent) | Опис сутності в межах моделі |
 |:---:|:---|:---|:---|
-| **0 (Root)** | `client` | *Відсутній (Корінь дерева)* | Клієнт магазину, що ініціює замовлення меблевих виробів |
-| **1** | `order` | `client` | Замовлення, оформлене клієнтом |
-| **2** | `contract` | `order` | Договір купівлі-продажу / виготовлення під замовлення |
-| **2** | `receipt` | `order` | Фінансовий платіжний документ (квитанція про сплату) |
-| **2** | `manager` | `order` | Менеджер магазину, відповідальний за супровід замовлення |
-| **2** | `furniture` | `order` | Одиниця меблевого виробу, включена до замовлення |
-| **3** | `manufacturer`| `furniture` | Фабрика-виробник замовленого меблевого виробу |
-| **3** | `supplier` | `furniture` | Постачальник комплектуючих та фурнітури для виробу |
+| **0 (Root)** | `CLIENT[Client]` | *Відсутній (Корінь дерева)* | Клієнт магазину, що ініціює замовлення меблевих виробів |
+| **1** | `ORDER[Order]` | `CLIENT[Client]` | Замовлення, оформлене клієнтом |
+| **2** | `CONTRACT[Contract]` | `ORDER[Order]` | Договір купівлі-продажу / виготовлення під замовлення |
+| **2** | `RECEIPT[Receipt]` | `ORDER[Order]` | Фінансовий платіжний документ (квитанція про сплату) |
+| **2** | `MANAGER[Manager]` | `ORDER[Order]` | Менеджер магазину, відповідальний за супровід замовлення |
+| **2** | `FURNITURE[Furniture]` | `ORDER[Order]` | Одиниця меблевого виробу, включена до замовлення |
+| **3** | `MANUFACTURER[Manufacturer]` | `FURNITURE[Furniture]` | Фабрика-виробник замовленого меблевого виробу |
+| **3** | `SUPPLIER[Supplier]` | `FURNITURE[Furniture]` | Постачальник комплектуючих та фурнітури для виробу |
 
 ### 3.2. Вузли-атрибути (Attribute Nodes) за класами
 
-1. **`client`**:
-   - `fullName` — повне ім'я (ПІБ) клієнта;
-   - `phone` — контактний номер телефону;
-   - `address` — адреса проживання / доставки.
-2. **`order`**:
-   - `orderDate` — дата реєстрації замовлення;
-   - `executionStatus` — поточний стан виконання (нове, комплектується, виготовляється, готове, доставлено);
-   - `deliveryAddress` — точна адреса доставки;
-   - `totalAmount` — загальна розрахункова вартість замовлення.
-3. **`contract`**:
-   - `contractDate` — дата підписання договору;
-   - `terms` — юридичні умови виконання, гарантійні зобов'язання та терміни.
-4. **`receipt`**:
-   - `paymentDate` — дата внесення оплати клієнтом;
-   - `amount` — фактично внесена сума коштів.
-5. **`manager`**:
-   - `fullName` — ПІБ менеджера з продажу;
-   - `phone` — робочий контактний телефон;
-   - `position` — посада співробітника;
-   - `qualification` — рівень кваліфікації / грейд.
-6. **`furniture`**:
-   - `name` — торгова назва меблевого виробу;
-   - `category` — категорія меблів (дивани, ліжка, столи, шафи тощо);
-   - `material` — основний матеріал корпусу / оббивки;
-   - `color` — колір та кодування відтінку;
-   - `dimensions` — габаритні розміри (ширина × висота × глибина);
-   - `price` — базова ціна виробу;
-   - `availabilityStatus` — статус наявності товару на складі;
-   - `productionTime` — час виготовлення фабрикою при замовленні.
-7. **`manufacturer`**:
-   - `name` — найменування меблевої фабрики;
-   - `country` — країна та місто розташування виробничих потужностей;
-   - `contacts` — корпоративні контактні дані виробника.
-8. **`supplier`**:
-   - `name` — комерційна назва компанії-постачальника фурнітури;
-   - `contactPerson` — контактна особа представника постачальника;
-   - `phone` — номер телефону відділу збуту постачальника;
-   - `address` — адреса регіонального складу / офісу;
-   - `supplyTerms` — умови, графік та мінімальний обсяг постачання.
+1. **`CLIENT[Client]`**:
+   - `FullName` — повне ім'я (ПІБ) клієнта;
+   - `Phone` — контактний номер телефону;
+   - `Address` — адреса проживання / доставки.
+2. **`ORDER[Order]`**:
+   - `OrderDate` — дата реєстрації замовлення;
+   - `ExecutionStatus` — поточний стан виконання (нове, комплектується, виготовляється, готове, доставлено);
+   - `DeliveryAddress` — точна адреса доставки;
+   - `TotalAmount` — загальна розрахункова вартість замовлення.
+3. **`CONTRACT[Contract]`**:
+   - `ContractDate` — дата підписання договору;
+   - `Terms` — юридичні умови виконання, гарантійні зобов'язання та терміни.
+4. **`RECEIPT[Receipt]`**:
+   - `PaymentDate` — дата внесення оплати клієнтом;
+   - `Amount` — фактично внесена сума коштів.
+5. **`MANAGER[Manager]`**:
+   - `FullName` — ПІБ менеджера з продажу;
+   - `Phone` — робочий контактний телефон;
+   - `Position` — посада співробітника;
+   - `Qualification` — рівень кваліфікації / грейд.
+6. **`FURNITURE[Furniture]`**:
+   - `Name` — торгова назва меблевого виробу;
+   - `Category` — категорія меблів (дивани, ліжка, столи, шафи тощо);
+   - `Material` — основний матеріал корпусу / оббивки;
+   - `Color` — колір та кодування відтінку;
+   - `Dimensions` — габаритні розміри (ширина × висота × глибина);
+   - `Price` — базова ціна виробу;
+   - `AvailabilityStatus` — статус наявності товару на складі;
+   - `ProductionTime` — час виготовлення фабрикою при замовленні.
+7. **`MANUFACTURER[Manufacturer]`**:
+   - `Name` — найменування меблевої фабрики;
+   - `Country` — країна та місто розташування виробничих потужностей;
+   - `Contacts` — корпоративні контактні дані виробника.
+8. **`SUPPLIER[Supplier]`**:
+   - `Name` — комерційна назва компанії-постачальника фурнітури;
+   - `ContactPerson` — контактна особа представника постачальника;
+   - `Phone` — номер телефону відділу збуту постачальника;
+   - `Address` — адреса регіонального складу / офісу;
+   - `SupplyTerms` — умови, графік та мінімальний обсяг постачання.
 
 ---
 
 ## 4. Висновки щодо відповідності вимогам
 
-- Схема містить **строго один корінь** (`client`);
+- Схема містить **строго один корінь** (`CLIENT[Client]`);
 - Усі міжкласові відношення мають вигляд **1:N (parent–child)**;
 - Будь-який child-вузол зв'язаний **лише з одним parent-вузлом**;
-- Властивості об'єктів явно представлені як підпорядковані **вузли-атрибути**;
+- Властивості об'єктів явно представлені як підпорядковані **вузли-атрибути** (кола `((...))`);
+- Вузли-класи оформлені прямокутниками `[...]` відповідно до еталонного прикладу;
 - Схема повністю сумісна з синтаксисом **GitHub Markdown Mermaid** та коректно візуалізується.

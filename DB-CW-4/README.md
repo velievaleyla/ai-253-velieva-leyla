@@ -23,13 +23,13 @@
 
 На попередньому етапі (`DB-CW-2`) було побудовано UML-діаграму концептуальних класів. При переході до ієрархічної моделі даних враховано ключові принципи організації ієрархічних БД:
 - **Деревовидна топологія:** дані організуються у формі орієнтованого кореневого дерева;
-- **Корінь дерева (`root`):** кореневим об'єктом обрано `client` (Клієнт), навколо якого будується ланцюг взаємодій у меблевому магазині;
+- **Корінь дерева (`root`):** кореневим об'єктом обрано `CLIENT[Client]` (Клієнт), навколо якого будується ланцюг взаємодій у меблевому магазині;
 - **Відношення «батько-нащадок» (Parent–Child):**
   - Будь-який `child`-вузол має строго **одного** `parent`-вузла;
   - Кожен `parent`-вузол може мати **довільну кількість** `child`-вузлів (1:N);
 - **Розподіл вузлів:**
-  - **Вузли-класи:** `client`, `order`, `contract`, `receipt`, `manager`, `furniture`, `manufacturer`, `supplier`;
-  - **Вузли-атрибути:** підпорядковані своїм класам як кінцеві властивості (описи вузлів).
+  - **Вузли-класи (прямокутники `[...]`):** `Client`, `Order`, `Contract`, `Receipt`, `Manager`, `Furniture`, `Manufacturer`, `Supplier`;
+  - **Вузли-атрибути (кола `((...))`):** підпорядковані своїм класам як кінцеві властивості (описи вузлів).
 
 ---
 
@@ -39,111 +39,62 @@
 
 ```mermaid
 graph TD
-    %% Стилізація вузлів
-    classDef classNode fill:#D4E6F1,stroke:#2980B9,stroke-width:2px,color:#1B4F72,font-weight:bold;
-    classDef attrNode fill:#E8DAEF,stroke:#884EA0,stroke-width:1.5px,color:#512E5F;
+  %% ===== Ієрархічна модель: Client → Order → Furniture → (Manufacturer, Supplier) =====
 
-    %% 1. Корінь дерева: Клієнт (Client)
-    client([client]):::classNode
-    
-    %% Атрибути Client
-    c_fullname([fullName]):::attrNode
-    c_phone([phone]):::attrNode
-    c_address([address]):::attrNode
-    
-    client --> c_fullname
-    client --> c_phone
-    client --> c_address
+  %% Root
+  CLIENT[Client]
+  CLIENT --> c_fullname((FullName))
+  CLIENT --> c_phone((Phone))
+  CLIENT --> c_address((Address))
 
-    %% 2. Дочірній клас: Замовлення (Order)
-    order([order]):::classNode
-    client --> order
+  %% Order (child of Client)
+  CLIENT --> ORDER[Order]
+  ORDER --> o_orderdate((OrderDate))
+  ORDER --> o_executionstatus((ExecutionStatus))
+  ORDER --> o_deliveryaddress((DeliveryAddress))
+  ORDER --> o_totalamount((TotalAmount))
 
-    %% Атрибути Order
-    o_date([orderDate]):::attrNode
-    o_status([executionStatus]):::attrNode
-    o_address([deliveryAddress]):::attrNode
-    o_amount([totalAmount]):::attrNode
+  %% Contract (child of Order)
+  ORDER --> CONTRACT[Contract]
+  CONTRACT --> cnt_contractdate((ContractDate))
+  CONTRACT --> cnt_terms((Terms))
 
-    order --> o_date
-    order --> o_status
-    order --> o_address
-    order --> o_amount
+  %% Receipt (child of Order)
+  ORDER --> RECEIPT[Receipt]
+  RECEIPT --> rcp_paymentdate((PaymentDate))
+  RECEIPT --> rcp_amount((Amount))
 
-    %% 3. Дочірній клас: Договір (Contract)
-    contract([contract]):::classNode
-    order --> contract
-    cnt_date([contractDate]):::attrNode
-    cnt_terms([terms]):::attrNode
-    contract --> cnt_date
-    contract --> cnt_terms
+  %% Manager (child of Order)
+  ORDER --> MANAGER[Manager]
+  MANAGER --> m_fullname((FullName))
+  MANAGER --> m_phone((Phone))
+  MANAGER --> m_position((Position))
+  MANAGER --> m_qualification((Qualification))
 
-    %% 4. Дочірній клас: Квитанція (Receipt)
-    receipt([receipt]):::classNode
-    order --> receipt
-    rcp_date([paymentDate]):::attrNode
-    rcp_amount([amount]):::attrNode
-    receipt --> rcp_date
-    receipt --> rcp_amount
+  %% Furniture (child of Order)
+  ORDER --> FURNITURE[Furniture]
+  FURNITURE --> f_name((Name))
+  FURNITURE --> f_category((Category))
+  FURNITURE --> f_material((Material))
+  FURNITURE --> f_color((Color))
+  FURNITURE --> f_dimensions((Dimensions))
+  FURNITURE --> f_price((Price))
+  FURNITURE --> f_availabilitystatus((AvailabilityStatus))
+  FURNITURE --> f_productiontime((ProductionTime))
 
-    %% 5. Дочірній клас: Менеджер (Manager)
-    manager([manager]):::classNode
-    order --> manager
-    m_fullname([fullName]):::attrNode
-    m_phone([phone]):::attrNode
-    m_position([position]):::attrNode
-    m_qual([qualification]):::attrNode
-    manager --> m_fullname
-    manager --> m_phone
-    manager --> m_position
-    manager --> m_qual
+  %% Manufacturer (child of Furniture)
+  FURNITURE --> MANUFACTURER[Manufacturer]
+  MANUFACTURER --> mfr_name((Name))
+  MANUFACTURER --> mfr_country((Country))
+  MANUFACTURER --> mfr_contacts((Contacts))
 
-    %% 6. Дочірній клас: Меблі (Furniture)
-    furniture([furniture]):::classNode
-    order --> furniture
-
-    %% Атрибути Furniture
-    f_name([name]):::attrNode
-    f_category([category]):::attrNode
-    f_material([material]):::attrNode
-    f_color([color]):::attrNode
-    f_dim([dimensions]):::attrNode
-    f_price([price]):::attrNode
-    f_avail([availabilityStatus]):::attrNode
-    f_prodtime([productionTime]):::attrNode
-
-    furniture --> f_name
-    furniture --> f_category
-    furniture --> f_material
-    furniture --> f_color
-    furniture --> f_dim
-    furniture --> f_price
-    furniture --> f_avail
-    furniture --> f_prodtime
-
-    %% 7. Дочірній клас: Виробник (Manufacturer)
-    manufacturer([manufacturer]):::classNode
-    furniture --> manufacturer
-    mfr_name([name]):::attrNode
-    mfr_country([country]):::attrNode
-    mfr_contacts([contacts]):::attrNode
-    manufacturer --> mfr_name
-    manufacturer --> mfr_country
-    manufacturer --> mfr_contacts
-
-    %% 8. Дочірній клас: Постачальник (Supplier)
-    supplier([supplier]):::classNode
-    furniture --> supplier
-    sup_name([name]):::attrNode
-    sup_contact([contactPerson]):::attrNode
-    sup_phone([phone]):::attrNode
-    sup_address([address]):::attrNode
-    sup_terms([supplyTerms]):::attrNode
-    supplier --> sup_name
-    supplier --> sup_contact
-    supplier --> sup_phone
-    supplier --> sup_address
-    supplier --> sup_terms
+  %% Supplier (child of Furniture)
+  FURNITURE --> SUPPLIER[Supplier]
+  SUPPLIER --> sup_name((Name))
+  SUPPLIER --> sup_contactperson((ContactPerson))
+  SUPPLIER --> sup_phone((Phone))
+  SUPPLIER --> sup_address((Address))
+  SUPPLIER --> sup_supplyterms((SupplyTerms))
 ```
 
 ---
